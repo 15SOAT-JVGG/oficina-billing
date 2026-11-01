@@ -1,0 +1,3 @@
+interface:
+  display_name: "Check contract parity"
+  short_description: "Rota do Billing × rota do oficina-app"
