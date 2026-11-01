@@ -1,0 +1,3 @@
+interface:
+  display_name: "Add Flyway migration"
+  short_description: "Tabela nova ou alterada com DDL explícito e Hibernate validate"
