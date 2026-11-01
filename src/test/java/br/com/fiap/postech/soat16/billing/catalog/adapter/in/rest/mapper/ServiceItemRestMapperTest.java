@@ -16,8 +16,8 @@ import br.com.fiap.postech.soat16.billing.catalog.application.command.CreateServ
 import br.com.fiap.postech.soat16.billing.catalog.application.command.UpdateServiceItemCommand;
 import br.com.fiap.postech.soat16.billing.catalog.application.result.ServiceItemResult;
 
-@DisplayName("ServiceCatalogRestMapper — DTO ↔ Command/Result")
-class ServiceCatalogRestMapperTest {
+@DisplayName("ServiceItemRestMapper — DTO ↔ Command/Result")
+class ServiceItemRestMapperTest {
 
     private static final UUID ID = UUID.randomUUID();
     private static final ServiceItemRequestDto REQUEST =
@@ -26,7 +26,7 @@ class ServiceCatalogRestMapperTest {
     @Test
     @DisplayName("deve mapear o request para o comando de criação campo a campo")
     void toCreateCommand() {
-        CreateServiceItemCommand command = ServiceCatalogRestMapper.toCreateCommand(REQUEST);
+        CreateServiceItemCommand command = ServiceItemRestMapper.toCreateCommand(REQUEST);
 
         assertEquals(new CreateServiceItemCommand("Troca de oleo", "desc", new BigDecimal("80.00"), 30, false), command);
     }
@@ -34,7 +34,7 @@ class ServiceCatalogRestMapperTest {
     @Test
     @DisplayName("deve mapear o request e o id para o comando de atualização")
     void toUpdateCommand() {
-        UpdateServiceItemCommand command = ServiceCatalogRestMapper.toUpdateCommand(ID, REQUEST);
+        UpdateServiceItemCommand command = ServiceItemRestMapper.toUpdateCommand(ID, REQUEST);
 
         assertEquals(
                 new UpdateServiceItemCommand(ID, "Troca de oleo", "desc", new BigDecimal("80.00"), 30, false), command);
@@ -45,15 +45,15 @@ class ServiceCatalogRestMapperTest {
     void keepsNullActive() {
         ServiceItemRequestDto request = new ServiceItemRequestDto("x", null, BigDecimal.ONE, null, null);
 
-        assertNull(ServiceCatalogRestMapper.toCreateCommand(request).active());
-        assertNull(ServiceCatalogRestMapper.toUpdateCommand(ID, request).estimatedDurationMinutes());
+        assertNull(ServiceItemRestMapper.toCreateCommand(request).active());
+        assertNull(ServiceItemRestMapper.toUpdateCommand(ID, request).estimatedDurationMinutes());
     }
 
     @Test
     @DisplayName("deve mapear id para query e comando de remoção")
     void toQueryAndDelete() {
-        assertEquals(ID, ServiceCatalogRestMapper.toQuery(ID).id());
-        assertEquals(ID, ServiceCatalogRestMapper.toDeleteCommand(ID).id());
+        assertEquals(ID, ServiceItemRestMapper.toQuery(ID).id());
+        assertEquals(ID, ServiceItemRestMapper.toDeleteCommand(ID).id());
     }
 
     @Test
@@ -62,7 +62,7 @@ class ServiceCatalogRestMapperTest {
         OffsetDateTime createdAt = OffsetDateTime.parse("2026-01-01T10:00:00Z");
         ServiceItemResult result = new ServiceItemResult(ID, "Troca de oleo", null, new BigDecimal("80.00"), 30, true, createdAt);
 
-        ServiceItemResponseDto response = ServiceCatalogRestMapper.toResponse(result);
+        ServiceItemResponseDto response = ServiceItemRestMapper.toResponse(result);
 
         assertEquals(new ServiceItemResponseDto(ID, "Troca de oleo", null, new BigDecimal("80.00"), 30, true, createdAt), response);
     }

@@ -36,12 +36,14 @@ import io.smallrye.mutiny.Uni;
  * Sem as rotas de estoque do monólito ({@code GET /low-stock}, {@code PATCH /{id}/stock}): o saldo
  * é do Execution (spec #106).
  */
-@Path("/admin/parts")
+@Path(PartControllerDocs.PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Parts and Supplies", description = "Parts and supplies catalog with unit prices")
 public interface PartControllerDocs {
+
+    String PATH = "/admin/parts";
 
     String UNAUTHORIZED = "Missing or invalid token";
     String FORBIDDEN = "Insufficient role";

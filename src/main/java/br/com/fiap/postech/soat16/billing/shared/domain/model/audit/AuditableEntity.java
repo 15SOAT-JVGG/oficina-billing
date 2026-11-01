@@ -20,10 +20,6 @@ public abstract class AuditableEntity {
 
     private final String updatedBy;
 
-    protected AuditableEntity() {
-        this(null, null, null, null);
-    }
-
     protected AuditableEntity(
             OffsetDateTime createdAt, OffsetDateTime updatedAt, String createdBy, String updatedBy) {
         this.createdAt = createdAt;

@@ -1,5 +1,6 @@
 package br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.openapi;
 
+import static br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.openapi.PartControllerDocs.PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -24,7 +25,6 @@ import io.quarkus.test.junit.QuarkusTest;
 @DisplayName("OpenAPI — contrato publicado do catálogo de peças")
 class PartOpenApiContractIT {
 
-    private static final String PATH = "/admin/parts";
     private static final String BY_ID = PATH + "/{id}";
 
     @Test

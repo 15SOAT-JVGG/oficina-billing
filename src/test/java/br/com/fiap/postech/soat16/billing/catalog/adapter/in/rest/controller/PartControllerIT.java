@@ -1,6 +1,6 @@
 package br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.controller;
 
-import static br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.controller.PartController.PARTS_PATH;
+import static br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.openapi.PartControllerDocs.PATH;
 import static br.com.fiap.postech.soat16.billing.shared.test.infrastructure.TestTokens.bearer;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -58,7 +58,7 @@ class PartControllerIT {
                 .contentType(ContentType.JSON)
                 .body(validBody(name))
         .when()
-                .post(PARTS_PATH)
+                .post(PATH)
         .then()
                 .statusCode(201)
                 .extract().path("id");
@@ -78,7 +78,7 @@ class PartControllerIT {
                     .contentType(ContentType.JSON)
                     .body(validBody(name))
             .when()
-                    .post(PARTS_PATH)
+                    .post(PATH)
             .then()
                     .statusCode(201)
                     .body("id", notNullValue())
@@ -91,7 +91,7 @@ class PartControllerIT {
                     .extract();
 
             String id = created.path("id");
-            assertThat(created.header("Location"), endsWith(PARTS_PATH + "/" + id));
+            assertThat(created.header("Location"), endsWith(PATH + "/" + id));
         }
 
         @Test
@@ -104,7 +104,7 @@ class PartControllerIT {
                             {"name":"%s","unitPrice":10.00,"unit":"L"}
                             """.formatted(uniqueName()))
             .when()
-                    .post(PARTS_PATH)
+                    .post(PATH)
             .then()
                     .statusCode(201)
                     .body("partType", equalTo("PART"));
@@ -116,7 +116,7 @@ class PartControllerIT {
                             {"name":"%s","unitPrice":59.90,"unit":"L","partType":"SUPPLY"}
                             """.formatted("Oleo 5W30 - " + UUID.randomUUID()))
             .when()
-                    .post(PARTS_PATH)
+                    .post(PATH)
             .then()
                     .statusCode(201)
                     .body("partType", equalTo("SUPPLY"));
@@ -134,7 +134,7 @@ class PartControllerIT {
                             {"name":"%s","unitPrice":35.90,"unit":"UN","stockQuantity":10,"minimumStock":2}
                             """.formatted(uniqueName()))
             .when()
-                    .post(PARTS_PATH)
+                    .post(PATH)
             .then()
                     .statusCode(201)
                     .body("$", not(hasKey("stockQuantity")))
@@ -152,7 +152,7 @@ class PartControllerIT {
                             {"description":"sem nada"}
                             """)
             .when()
-                    .post(PARTS_PATH)
+                    .post(PATH)
             .then()
                     .statusCode(400)
                     .body("status", equalTo(400))
@@ -172,7 +172,7 @@ class PartControllerIT {
                             {"name":"%s","unitPrice":0,"unit":"UN"}
                             """.formatted(uniqueName()))
             .when()
-                    .post(PARTS_PATH)
+                    .post(PATH)
             .then()
                     .statusCode(400)
                     .body("violations", hasItem("unitPrice: Price must be greater than zero"));
@@ -185,7 +185,7 @@ class PartControllerIT {
                     .contentType(ContentType.JSON)
                     .body(validBody(uniqueName()))
             .when()
-                    .post(PARTS_PATH)
+                    .post(PATH)
             .then()
                     .statusCode(401);
         }
@@ -198,7 +198,7 @@ class PartControllerIT {
                     .contentType(ContentType.JSON)
                     .body(validBody(uniqueName()))
             .when()
-                    .post(PARTS_PATH)
+                    .post(PATH)
             .then()
                     .statusCode(403);
         }
@@ -216,7 +216,7 @@ class PartControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(ADMIN))
             .when()
-                    .get(PARTS_PATH)
+                    .get(PATH)
             .then()
                     .statusCode(200)
                     .body("id", hasItem(id));
@@ -230,7 +230,7 @@ class PartControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(MECHANIC))
             .when()
-                    .get(PARTS_PATH)
+                    .get(PATH)
             .then()
                     .statusCode(200)
                     .body("$", not(hasSize(0)));
@@ -239,7 +239,7 @@ class PartControllerIT {
         @Test
         @DisplayName("deve devolver 401 sem token")
         void shouldRequireToken() {
-            given().when().get(PARTS_PATH).then().statusCode(401);
+            given().when().get(PATH).then().statusCode(401);
         }
 
         @Test
@@ -248,7 +248,7 @@ class PartControllerIT {
             given()
                     .header(AUTHORIZATION, bearer("CUSTOMER"))
             .when()
-                    .get(PARTS_PATH)
+                    .get(PATH)
             .then()
                     .statusCode(403);
         }
@@ -259,7 +259,7 @@ class PartControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(ADMIN))
             .when()
-                    .get(PARTS_PATH + "/low-stock")
+                    .get(PATH + "/low-stock")
             .then()
                     .statusCode(404);
         }
@@ -279,7 +279,7 @@ class PartControllerIT {
                 given()
                         .header(AUTHORIZATION, bearer(role))
                 .when()
-                        .get(PARTS_PATH + "/" + id)
+                        .get(PATH + "/" + id)
                 .then()
                         .statusCode(200)
                         .body("id", equalTo(id))
@@ -295,7 +295,7 @@ class PartControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(ADMIN))
             .when()
-                    .get(PARTS_PATH + "/" + missing)
+                    .get(PATH + "/" + missing)
             .then()
                     .statusCode(404)
                     .body("status", equalTo(404))
@@ -308,7 +308,7 @@ class PartControllerIT {
         @Test
         @DisplayName("deve devolver 401 sem token")
         void shouldRequireToken() {
-            given().when().get(PARTS_PATH + "/" + UUID.randomUUID()).then().statusCode(401);
+            given().when().get(PATH + "/" + UUID.randomUUID()).then().statusCode(401);
         }
 
         @Test
@@ -317,7 +317,7 @@ class PartControllerIT {
             given()
                     .header(AUTHORIZATION, bearer("CUSTOMER"))
             .when()
-                    .get(PARTS_PATH + "/" + UUID.randomUUID())
+                    .get(PATH + "/" + UUID.randomUUID())
             .then()
                     .statusCode(403);
         }
@@ -340,7 +340,7 @@ class PartControllerIT {
                             {"name":"%s","description":"Sintetico","unitPrice":59.90,"unit":"L","partType":"SUPPLY"}
                             """.formatted(newName))
             .when()
-                    .put(PARTS_PATH + "/" + id)
+                    .put(PATH + "/" + id)
             .then()
                     .statusCode(200)
                     .body("id", equalTo(id))
@@ -352,7 +352,7 @@ class PartControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(ADMIN))
             .when()
-                    .get(PARTS_PATH + "/" + id)
+                    .get(PATH + "/" + id)
             .then()
                     .statusCode(200)
                     .body("partType", equalTo("SUPPLY"));
@@ -370,7 +370,7 @@ class PartControllerIT {
                             {"name":"","unitPrice":-1,"unit":""}
                             """)
             .when()
-                    .put(PARTS_PATH + "/" + id)
+                    .put(PATH + "/" + id)
             .then()
                     .statusCode(400)
                     .body("error", equalTo(VALIDATION_ERROR))
@@ -386,7 +386,7 @@ class PartControllerIT {
                     .contentType(ContentType.JSON)
                     .body(validBody(uniqueName()))
             .when()
-                    .put(PARTS_PATH + "/" + UUID.randomUUID())
+                    .put(PATH + "/" + UUID.randomUUID())
             .then()
                     .statusCode(404)
                     .body("type", equalTo("NOT_FOUND"))
@@ -400,7 +400,7 @@ class PartControllerIT {
                     .contentType(ContentType.JSON)
                     .body(validBody(uniqueName()))
             .when()
-                    .put(PARTS_PATH + "/" + UUID.randomUUID())
+                    .put(PATH + "/" + UUID.randomUUID())
             .then()
                     .statusCode(401);
         }
@@ -415,7 +415,7 @@ class PartControllerIT {
                     .contentType(ContentType.JSON)
                     .body(validBody(uniqueName()))
             .when()
-                    .put(PARTS_PATH + "/" + id)
+                    .put(PATH + "/" + id)
             .then()
                     .statusCode(403);
         }
@@ -429,7 +429,7 @@ class PartControllerIT {
                     .header(AUTHORIZATION, bearer(ADMIN))
                     .queryParam("adjustment", 5)
             .when()
-                    .patch(PARTS_PATH + "/" + id + "/stock")
+                    .patch(PATH + "/" + id + "/stock")
             .then()
                     .statusCode(404);
         }
@@ -447,7 +447,7 @@ class PartControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(ADMIN))
             .when()
-                    .delete(PARTS_PATH + "/" + id)
+                    .delete(PATH + "/" + id)
             .then()
                     .statusCode(204)
                     .body(is(""));
@@ -455,7 +455,7 @@ class PartControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(ADMIN))
             .when()
-                    .get(PARTS_PATH + "/" + id)
+                    .get(PATH + "/" + id)
             .then()
                     .statusCode(404)
                     .body("code", equalTo(NOT_FOUND_CODE));
@@ -467,7 +467,7 @@ class PartControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(ADMIN))
             .when()
-                    .delete(PARTS_PATH + "/" + UUID.randomUUID())
+                    .delete(PATH + "/" + UUID.randomUUID())
             .then()
                     .statusCode(404)
                     .body("type", equalTo("NOT_FOUND"))
@@ -477,7 +477,7 @@ class PartControllerIT {
         @Test
         @DisplayName("deve devolver 401 sem token")
         void shouldRequireToken() {
-            given().when().delete(PARTS_PATH + "/" + UUID.randomUUID()).then().statusCode(401);
+            given().when().delete(PATH + "/" + UUID.randomUUID()).then().statusCode(401);
         }
 
         @Test
@@ -488,7 +488,7 @@ class PartControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(MECHANIC))
             .when()
-                    .delete(PARTS_PATH + "/" + id)
+                    .delete(PATH + "/" + id)
             .then()
                     .statusCode(403);
         }

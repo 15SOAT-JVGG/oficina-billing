@@ -11,13 +11,31 @@ import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
+import org.jboss.logging.MDC;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import br.com.fiap.postech.soat16.billing.shared.adapter.in.rest.RequestCorrelationFilter;
 import br.com.fiap.postech.soat16.billing.shared.adapter.in.rest.dto.ApiErrorResponseDto;
 
 @DisplayName("UnexpectedExceptionMapper — fallback para 500")
 class UnexpectedExceptionMapperTest {
+
+    @AfterEach
+    void clearMdc() {
+        MDC.remove(RequestCorrelationFilter.REQUEST_ID_MDC_KEY);
+    }
+
+    @Test
+    @DisplayName("deve usar o X-Request-ID da requisição como traceId quando o filtro já o registrou")
+    void shouldReuseRequestIdAsTraceId() {
+        MDC.put(RequestCorrelationFilter.REQUEST_ID_MDC_KEY, "req-42");
+
+        Response response = new UnexpectedExceptionMapper().toResponse(new IllegalStateException("x"));
+
+        assertEquals("req-42", ((ApiErrorResponseDto) response.getEntity()).traceId());
+    }
 
     @Test
     @DisplayName("deve devolver 500 com traceId e sem expor a mensagem interna")

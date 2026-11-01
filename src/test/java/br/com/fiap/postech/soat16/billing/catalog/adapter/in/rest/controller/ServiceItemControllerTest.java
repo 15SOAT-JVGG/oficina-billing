@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.dto.request.ServiceItemRequestDto;
 import br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.dto.response.ServiceItemResponseDto;
-import br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.mapper.ServiceCatalogRestMapper;
+import br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.mapper.ServiceItemRestMapper;
 import br.com.fiap.postech.soat16.billing.catalog.application.ServiceItemService;
 import br.com.fiap.postech.soat16.billing.catalog.application.result.ServiceItemResult;
 import br.com.fiap.postech.soat16.billing.catalog.domain.exception.ServiceItemNotFoundException;
@@ -61,13 +61,13 @@ class ServiceItemControllerTest {
 
             List<ServiceItemResponseDto> response = controller.listAll().await().indefinitely();
 
-            assertEquals(List.of(ServiceCatalogRestMapper.toResponse(RESULT)), response);
+            assertEquals(List.of(ServiceItemRestMapper.toResponse(RESULT)), response);
         }
 
         @Test
         @DisplayName("GET /admin/services/{id} deve devolver o serviço mapeado")
         void shouldFind() {
-            when(service.findById(ServiceCatalogRestMapper.toQuery(ID))).thenReturn(Uni.createFrom().item(RESULT));
+            when(service.findById(ServiceItemRestMapper.toQuery(ID))).thenReturn(Uni.createFrom().item(RESULT));
 
             ServiceItemResponseDto response = controller.findById(ID).await().indefinitely();
 
@@ -77,7 +77,7 @@ class ServiceItemControllerTest {
         @Test
         @DisplayName("deve propagar a falha do serviço sem tratá-la")
         void shouldPropagateFailure() {
-            when(service.findById(ServiceCatalogRestMapper.toQuery(ID)))
+            when(service.findById(ServiceItemRestMapper.toQuery(ID)))
                     .thenReturn(Uni.createFrom().failure(new ServiceItemNotFoundException(ID)));
 
             Uni<ServiceItemResponseDto> response = controller.findById(ID);
@@ -93,19 +93,19 @@ class ServiceItemControllerTest {
         @Test
         @DisplayName("POST /admin/services deve devolver 201 com Location e corpo")
         void shouldCreate() {
-            when(service.create(ServiceCatalogRestMapper.toCreateCommand(REQUEST))).thenReturn(Uni.createFrom().item(RESULT));
+            when(service.create(ServiceItemRestMapper.toCreateCommand(REQUEST))).thenReturn(Uni.createFrom().item(RESULT));
 
             Response response = controller.create(REQUEST).await().indefinitely();
 
             assertEquals(201, response.getStatus());
             assertEquals("/admin/services/" + ID, response.getLocation().toString());
-            assertEquals(ServiceCatalogRestMapper.toResponse(RESULT), response.getEntity());
+            assertEquals(ServiceItemRestMapper.toResponse(RESULT), response.getEntity());
         }
 
         @Test
         @DisplayName("PUT /admin/services/{id} deve devolver o serviço atualizado")
         void shouldUpdate() {
-            when(service.update(ServiceCatalogRestMapper.toUpdateCommand(ID, REQUEST)))
+            when(service.update(ServiceItemRestMapper.toUpdateCommand(ID, REQUEST)))
                     .thenReturn(Uni.createFrom().item(RESULT));
 
             ServiceItemResponseDto response = controller.update(ID, REQUEST).await().indefinitely();
@@ -116,13 +116,13 @@ class ServiceItemControllerTest {
         @Test
         @DisplayName("DELETE /admin/services/{id} deve devolver 204 sem corpo")
         void shouldDelete() {
-            when(service.delete(ServiceCatalogRestMapper.toDeleteCommand(ID))).thenReturn(Uni.createFrom().voidItem());
+            when(service.delete(ServiceItemRestMapper.toDeleteCommand(ID))).thenReturn(Uni.createFrom().voidItem());
 
             Response response = controller.delete(ID).await().indefinitely();
 
             assertEquals(204, response.getStatus());
             assertNull(response.getEntity());
-            verify(service).delete(ServiceCatalogRestMapper.toDeleteCommand(ID));
+            verify(service).delete(ServiceItemRestMapper.toDeleteCommand(ID));
         }
     }
 }

@@ -26,6 +26,7 @@ import io.opentelemetry.api.trace.Span;
 public class RequestCorrelationFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
     static final String REQUEST_ID_HEADER = "X-Request-ID";
+    public static final String REQUEST_ID_MDC_KEY = "requestId";
     private static final String REQUEST_ID_PROPERTY = RequestCorrelationFilter.class.getName() + ".requestId";
     private static final Pattern SAFE_REQUEST_ID = Pattern.compile("[A-Za-z0-9._:-]{1,128}");
     private static final Logger LOG = Logger.getLogger(RequestCorrelationFilter.class);
@@ -38,7 +39,7 @@ public class RequestCorrelationFilter implements ContainerRequestFilter, Contain
         }
 
         requestContext.setProperty(REQUEST_ID_PROPERTY, requestId);
-        MDC.put("requestId", requestId);
+        MDC.put(REQUEST_ID_MDC_KEY, requestId);
         Span.current().setAttribute("request.id", requestId);
     }
 
@@ -49,7 +50,7 @@ public class RequestCorrelationFilter implements ContainerRequestFilter, Contain
             responseContext.getHeaders().putSingle(REQUEST_ID_HEADER, value);
         }
         LOG.infof("HTTP completed method=%s status=%d", requestContext.getMethod(), responseContext.getStatus());
-        MDC.remove("requestId");
+        MDC.remove(REQUEST_ID_MDC_KEY);
     }
 
     private static String validRequestId(String requestId) {

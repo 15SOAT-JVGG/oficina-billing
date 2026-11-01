@@ -10,9 +10,9 @@ import br.com.fiap.postech.soat16.billing.catalog.application.command.FindServic
 import br.com.fiap.postech.soat16.billing.catalog.application.command.UpdateServiceItemCommand;
 import br.com.fiap.postech.soat16.billing.catalog.application.result.ServiceItemResult;
 
-public final class ServiceCatalogRestMapper {
+public final class ServiceItemRestMapper {
 
-    private ServiceCatalogRestMapper() {
+    private ServiceItemRestMapper() {
     }
 
     public static CreateServiceItemCommand toCreateCommand(ServiceItemRequestDto request) {

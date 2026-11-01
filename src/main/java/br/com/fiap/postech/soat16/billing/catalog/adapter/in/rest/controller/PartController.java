@@ -22,8 +22,6 @@ import lombok.RequiredArgsConstructor;
 @RolesAllowed({"ADMIN", "MECHANIC"})
 public class PartController implements PartControllerDocs {
 
-    public static final String PARTS_PATH = "/admin/parts";
-
     private final PartService service;
 
     @Override
@@ -43,7 +41,7 @@ public class PartController implements PartControllerDocs {
     public Uni<Response> create(PartRequestDto dto) {
         return service.create(PartRestMapper.toCreateCommand(dto))
                 .map(PartRestMapper::toResponse)
-                .map(created -> Response.created(URI.create(PARTS_PATH + "/" + created.id()))
+                .map(created -> Response.created(URI.create(PATH + "/" + created.id()))
                         .entity(created)
                         .build());
     }

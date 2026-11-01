@@ -10,7 +10,7 @@ import jakarta.ws.rs.core.Response;
 
 import br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.dto.request.ServiceItemRequestDto;
 import br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.dto.response.ServiceItemResponseDto;
-import br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.mapper.ServiceCatalogRestMapper;
+import br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.mapper.ServiceItemRestMapper;
 import br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.openapi.ServiceItemControllerDocs;
 import br.com.fiap.postech.soat16.billing.catalog.application.ServiceItemService;
 
@@ -22,28 +22,26 @@ import lombok.RequiredArgsConstructor;
 @RolesAllowed({"ADMIN", "MECHANIC"})
 public class ServiceItemController implements ServiceItemControllerDocs {
 
-    public static final String SERVICES_PATH = "/admin/services";
-
     private final ServiceItemService service;
 
     @Override
     public Uni<List<ServiceItemResponseDto>> listAll() {
         return service.listAll()
-                .map(results -> results.stream().map(ServiceCatalogRestMapper::toResponse).toList());
+                .map(results -> results.stream().map(ServiceItemRestMapper::toResponse).toList());
     }
 
     @Override
     public Uni<ServiceItemResponseDto> findById(UUID id) {
-        return service.findById(ServiceCatalogRestMapper.toQuery(id))
-                .map(ServiceCatalogRestMapper::toResponse);
+        return service.findById(ServiceItemRestMapper.toQuery(id))
+                .map(ServiceItemRestMapper::toResponse);
     }
 
     @RolesAllowed("ADMIN")
     @Override
     public Uni<Response> create(ServiceItemRequestDto dto) {
-        return service.create(ServiceCatalogRestMapper.toCreateCommand(dto))
-                .map(ServiceCatalogRestMapper::toResponse)
-                .map(created -> Response.created(URI.create(SERVICES_PATH + "/" + created.id()))
+        return service.create(ServiceItemRestMapper.toCreateCommand(dto))
+                .map(ServiceItemRestMapper::toResponse)
+                .map(created -> Response.created(URI.create(PATH + "/" + created.id()))
                         .entity(created)
                         .build());
     }
@@ -51,14 +49,14 @@ public class ServiceItemController implements ServiceItemControllerDocs {
     @RolesAllowed("ADMIN")
     @Override
     public Uni<ServiceItemResponseDto> update(UUID id, ServiceItemRequestDto dto) {
-        return service.update(ServiceCatalogRestMapper.toUpdateCommand(id, dto))
-                .map(ServiceCatalogRestMapper::toResponse);
+        return service.update(ServiceItemRestMapper.toUpdateCommand(id, dto))
+                .map(ServiceItemRestMapper::toResponse);
     }
 
     @RolesAllowed("ADMIN")
     @Override
     public Uni<Response> delete(UUID id) {
-        return service.delete(ServiceCatalogRestMapper.toDeleteCommand(id))
+        return service.delete(ServiceItemRestMapper.toDeleteCommand(id))
                 .replaceWith(Response.noContent().build());
     }
 }

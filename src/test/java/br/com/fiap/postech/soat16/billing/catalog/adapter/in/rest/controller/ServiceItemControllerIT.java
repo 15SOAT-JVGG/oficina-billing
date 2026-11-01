@@ -1,6 +1,6 @@
 package br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.controller;
 
-import static br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.controller.ServiceItemController.SERVICES_PATH;
+import static br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.openapi.ServiceItemControllerDocs.PATH;
 import static br.com.fiap.postech.soat16.billing.shared.test.infrastructure.TestTokens.bearer;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -62,7 +62,7 @@ class ServiceItemControllerIT {
                 .contentType(ContentType.JSON)
                 .body(validBody(name))
         .when()
-                .post(SERVICES_PATH)
+                .post(PATH)
         .then()
                 .statusCode(201)
                 .extract().path("id");
@@ -82,7 +82,7 @@ class ServiceItemControllerIT {
                     .contentType(ContentType.JSON)
                     .body(validBody(name))
             .when()
-                    .post(SERVICES_PATH)
+                    .post(PATH)
             .then()
                     .statusCode(201)
                     .body("id", notNullValue())
@@ -95,7 +95,7 @@ class ServiceItemControllerIT {
                     .extract();
 
             String id = created.path("id");
-            assertThat(created.header("Location"), endsWith(SERVICES_PATH + "/" + id));
+            assertThat(created.header("Location"), endsWith(PATH + "/" + id));
         }
 
         @Test
@@ -108,7 +108,7 @@ class ServiceItemControllerIT {
                             {"name":"%s","basePrice":50.00}
                             """.formatted(uniqueName()))
             .when()
-                    .post(SERVICES_PATH)
+                    .post(PATH)
             .then()
                     .statusCode(201)
                     .body("active", is(true))
@@ -126,7 +126,7 @@ class ServiceItemControllerIT {
                             {"description":"sem nome"}
                             """)
             .when()
-                    .post(SERVICES_PATH)
+                    .post(PATH)
             .then()
                     .statusCode(400)
                     .body("status", equalTo(400))
@@ -143,7 +143,7 @@ class ServiceItemControllerIT {
                     .contentType(ContentType.JSON)
                     .body(body(uniqueName(), "0.00", ""))
             .when()
-                    .post(SERVICES_PATH)
+                    .post(PATH)
             .then()
                     .statusCode(400)
                     .body("error", equalTo(VALIDATION_ERROR))
@@ -160,7 +160,7 @@ class ServiceItemControllerIT {
                             {"name":"%s","basePrice":80.00,"estimatedDurationMinutes":-1}
                             """.formatted(uniqueName()))
             .when()
-                    .post(SERVICES_PATH)
+                    .post(PATH)
             .then()
                     .statusCode(400)
                     .body("violations", hasItem("estimatedDurationMinutes: Estimated duration cannot be negative"));
@@ -173,7 +173,7 @@ class ServiceItemControllerIT {
                     .contentType(ContentType.JSON)
                     .body(validBody(uniqueName()))
             .when()
-                    .post(SERVICES_PATH)
+                    .post(PATH)
             .then()
                     .statusCode(401);
         }
@@ -186,7 +186,7 @@ class ServiceItemControllerIT {
                     .contentType(ContentType.JSON)
                     .body(validBody(uniqueName()))
             .when()
-                    .post(SERVICES_PATH)
+                    .post(PATH)
             .then()
                     .statusCode(403);
         }
@@ -204,7 +204,7 @@ class ServiceItemControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(ADMIN))
             .when()
-                    .get(SERVICES_PATH)
+                    .get(PATH)
             .then()
                     .statusCode(200)
                     .body("id", hasItem(id));
@@ -218,7 +218,7 @@ class ServiceItemControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(MECHANIC))
             .when()
-                    .get(SERVICES_PATH)
+                    .get(PATH)
             .then()
                     .statusCode(200)
                     .body("$", not(hasSize(0)));
@@ -227,7 +227,7 @@ class ServiceItemControllerIT {
         @Test
         @DisplayName("deve devolver 401 sem token")
         void shouldRequireToken() {
-            given().when().get(SERVICES_PATH).then().statusCode(401);
+            given().when().get(PATH).then().statusCode(401);
         }
 
         @Test
@@ -236,7 +236,7 @@ class ServiceItemControllerIT {
             given()
                     .header(AUTHORIZATION, bearer("CUSTOMER"))
             .when()
-                    .get(SERVICES_PATH)
+                    .get(PATH)
             .then()
                     .statusCode(403);
         }
@@ -256,7 +256,7 @@ class ServiceItemControllerIT {
                 given()
                         .header(AUTHORIZATION, bearer(role))
                 .when()
-                        .get(SERVICES_PATH + "/" + id)
+                        .get(PATH + "/" + id)
                 .then()
                         .statusCode(200)
                         .body("id", equalTo(id))
@@ -272,7 +272,7 @@ class ServiceItemControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(ADMIN))
             .when()
-                    .get(SERVICES_PATH + "/" + missing)
+                    .get(PATH + "/" + missing)
             .then()
                     .statusCode(404)
                     .body("status", equalTo(404))
@@ -285,7 +285,7 @@ class ServiceItemControllerIT {
         @Test
         @DisplayName("deve devolver 401 sem token")
         void shouldRequireToken() {
-            given().when().get(SERVICES_PATH + "/" + UUID.randomUUID()).then().statusCode(401);
+            given().when().get(PATH + "/" + UUID.randomUUID()).then().statusCode(401);
         }
 
         @Test
@@ -294,7 +294,7 @@ class ServiceItemControllerIT {
             given()
                     .header(AUTHORIZATION, bearer("CUSTOMER"))
             .when()
-                    .get(SERVICES_PATH + "/" + UUID.randomUUID())
+                    .get(PATH + "/" + UUID.randomUUID())
             .then()
                     .statusCode(403);
         }
@@ -317,7 +317,7 @@ class ServiceItemControllerIT {
                             {"name":"%s","basePrice":120.00,"estimatedDurationMinutes":45,"active":false}
                             """.formatted(newName))
             .when()
-                    .put(SERVICES_PATH + "/" + id)
+                    .put(PATH + "/" + id)
             .then()
                     .statusCode(200)
                     .body("id", equalTo(id))
@@ -329,7 +329,7 @@ class ServiceItemControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(ADMIN))
             .when()
-                    .get(SERVICES_PATH + "/" + id)
+                    .get(PATH + "/" + id)
             .then()
                     .statusCode(200)
                     .body("name", equalTo(newName))
@@ -348,7 +348,7 @@ class ServiceItemControllerIT {
                             {"name":"","basePrice":-5}
                             """)
             .when()
-                    .put(SERVICES_PATH + "/" + id)
+                    .put(PATH + "/" + id)
             .then()
                     .statusCode(400)
                     .body("error", equalTo(VALIDATION_ERROR))
@@ -364,7 +364,7 @@ class ServiceItemControllerIT {
                     .contentType(ContentType.JSON)
                     .body(validBody(uniqueName()))
             .when()
-                    .put(SERVICES_PATH + "/" + UUID.randomUUID())
+                    .put(PATH + "/" + UUID.randomUUID())
             .then()
                     .statusCode(404)
                     .body("type", equalTo("NOT_FOUND"))
@@ -378,7 +378,7 @@ class ServiceItemControllerIT {
                     .contentType(ContentType.JSON)
                     .body(validBody(uniqueName()))
             .when()
-                    .put(SERVICES_PATH + "/" + UUID.randomUUID())
+                    .put(PATH + "/" + UUID.randomUUID())
             .then()
                     .statusCode(401);
         }
@@ -393,7 +393,7 @@ class ServiceItemControllerIT {
                     .contentType(ContentType.JSON)
                     .body(validBody(uniqueName()))
             .when()
-                    .put(SERVICES_PATH + "/" + id)
+                    .put(PATH + "/" + id)
             .then()
                     .statusCode(403);
         }
@@ -411,7 +411,7 @@ class ServiceItemControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(ADMIN))
             .when()
-                    .delete(SERVICES_PATH + "/" + id)
+                    .delete(PATH + "/" + id)
             .then()
                     .statusCode(204)
                     .body(is(""));
@@ -419,7 +419,7 @@ class ServiceItemControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(ADMIN))
             .when()
-                    .get(SERVICES_PATH + "/" + id)
+                    .get(PATH + "/" + id)
             .then()
                     .statusCode(404)
                     .body("code", equalTo(NOT_FOUND_CODE));
@@ -431,7 +431,7 @@ class ServiceItemControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(ADMIN))
             .when()
-                    .delete(SERVICES_PATH + "/" + UUID.randomUUID())
+                    .delete(PATH + "/" + UUID.randomUUID())
             .then()
                     .statusCode(404)
                     .body("type", equalTo("NOT_FOUND"))
@@ -441,7 +441,7 @@ class ServiceItemControllerIT {
         @Test
         @DisplayName("deve devolver 401 sem token")
         void shouldRequireToken() {
-            given().when().delete(SERVICES_PATH + "/" + UUID.randomUUID()).then().statusCode(401);
+            given().when().delete(PATH + "/" + UUID.randomUUID()).then().statusCode(401);
         }
 
         @Test
@@ -452,7 +452,7 @@ class ServiceItemControllerIT {
             given()
                     .header(AUTHORIZATION, bearer(MECHANIC))
             .when()
-                    .delete(SERVICES_PATH + "/" + id)
+                    .delete(PATH + "/" + id)
             .then()
                     .statusCode(403);
         }

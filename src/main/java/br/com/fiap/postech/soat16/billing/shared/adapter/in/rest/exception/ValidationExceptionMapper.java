@@ -31,7 +31,7 @@ public class ValidationExceptionMapper implements ExceptionMapper<ConstraintViol
 
         return Response.status(Response.Status.BAD_REQUEST)
                 .entity(Map.of(
-                        "status", 400,
+                        "status", Response.Status.BAD_REQUEST.getStatusCode(),
                         "error", "Validation Error",
                         "violations", violations,
                         "timestamp", OffsetDateTime.now().toString()))

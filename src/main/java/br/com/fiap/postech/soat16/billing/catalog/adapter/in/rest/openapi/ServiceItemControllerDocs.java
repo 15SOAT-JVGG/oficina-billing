@@ -32,12 +32,14 @@ import br.com.fiap.postech.soat16.billing.shared.adapter.in.rest.dto.ApiErrorRes
 
 import io.smallrye.mutiny.Uni;
 
-@Path("/admin/services")
+@Path(ServiceItemControllerDocs.PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @SecurityRequirement(name = "bearerAuth")
 @Tag(name = "Service Catalog", description = "Catalog of services offered by the workshop")
 public interface ServiceItemControllerDocs {
+
+    String PATH = "/admin/services";
 
     String UNAUTHORIZED = "Missing or invalid token";
     String FORBIDDEN = "Insufficient role";

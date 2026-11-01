@@ -17,18 +17,21 @@ import br.com.fiap.postech.soat16.billing.shared.domain.exception.AppException;
 @Provider
 public class AppExceptionMapper implements ExceptionMapper<AppException> {
 
+    // Ausente em Response.Status do JAX-RS 3.1.
+    private static final int UNPROCESSABLE_ENTITY = 422;
+
     @Context
     UriInfo uriInfo;
 
     @Override
     public Response toResponse(AppException exception) {
         int status = switch (exception.getType()) {
-            case VALIDATION -> 400;
-            case UNAUTHORIZED -> 401;
-            case NOT_FOUND -> 404;
-            case CONFLICT -> 409;
-            case GONE -> 410;
-            case BUSINESS -> 422;
+            case VALIDATION -> Response.Status.BAD_REQUEST.getStatusCode();
+            case UNAUTHORIZED -> Response.Status.UNAUTHORIZED.getStatusCode();
+            case NOT_FOUND -> Response.Status.NOT_FOUND.getStatusCode();
+            case CONFLICT -> Response.Status.CONFLICT.getStatusCode();
+            case GONE -> Response.Status.GONE.getStatusCode();
+            case BUSINESS -> UNPROCESSABLE_ENTITY;
         };
 
         String path = uriInfo != null ? uriInfo.getPath() : null;

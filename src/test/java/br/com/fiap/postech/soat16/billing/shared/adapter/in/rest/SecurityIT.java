@@ -1,5 +1,6 @@
 package br.com.fiap.postech.soat16.billing.shared.adapter.in.rest;
 
+import static br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.openapi.ServiceItemControllerDocs.PATH;
 import static br.com.fiap.postech.soat16.billing.shared.test.infrastructure.TestTokens.bearer;
 import static br.com.fiap.postech.soat16.billing.shared.test.infrastructure.TestTokens.tokenFromOtherIssuer;
 import static io.restassured.RestAssured.given;
@@ -26,13 +27,12 @@ import io.restassured.http.ContentType;
 @DisplayName("Security — validação do JWT RS256 do OS Service")
 class SecurityIT {
 
-    private static final String SERVICES_PATH = "/admin/services";
     private static final String AUTHORIZATION = "Authorization";
 
     @Test
     @DisplayName("deve devolver 401 numa rota administrativa sem token")
     void shouldReturn401WithoutToken() {
-        given().when().get(SERVICES_PATH).then().statusCode(401);
+        given().when().get(PATH).then().statusCode(401);
     }
 
     @Test
@@ -41,7 +41,7 @@ class SecurityIT {
         given()
                 .header(AUTHORIZATION, "Bearer " + tokenFromOtherIssuer("ADMIN"))
         .when()
-                .get(SERVICES_PATH)
+                .get(PATH)
         .then()
                 .statusCode(401);
     }
@@ -52,7 +52,7 @@ class SecurityIT {
         given()
                 .header(AUTHORIZATION, "Bearer nao-e-um-jwt")
         .when()
-                .get(SERVICES_PATH)
+                .get(PATH)
         .then()
                 .statusCode(401);
     }
@@ -63,7 +63,7 @@ class SecurityIT {
         given()
                 .header(AUTHORIZATION, bearer("MECHANIC"))
         .when()
-                .get(SERVICES_PATH)
+                .get(PATH)
         .then()
                 .statusCode(200);
     }
@@ -78,7 +78,7 @@ class SecurityIT {
                         {"name":"Troca de oleo","basePrice":80.00}
                         """)
         .when()
-                .post(SERVICES_PATH)
+                .post(PATH)
         .then()
                 .statusCode(403);
     }
@@ -94,7 +94,7 @@ class SecurityIT {
                         {"name":"Troca de oleo","basePrice":80.00}
                         """)
         .when()
-                .post(SERVICES_PATH)
+                .post(PATH)
         .then()
                 .statusCode(201)
                 .header("X-Request-ID", equalTo("security-it-42"));

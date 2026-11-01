@@ -1,5 +1,6 @@
 package br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.openapi;
 
+import static br.com.fiap.postech.soat16.billing.catalog.adapter.in.rest.openapi.ServiceItemControllerDocs.PATH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Set;
@@ -23,7 +24,6 @@ import io.quarkus.test.junit.QuarkusTest;
 @DisplayName("OpenAPI — contrato publicado do catálogo de serviços")
 class ServiceItemOpenApiContractIT {
 
-    private static final String PATH = "/admin/services";
     private static final String BY_ID = PATH + "/{id}";
 
     @Test
