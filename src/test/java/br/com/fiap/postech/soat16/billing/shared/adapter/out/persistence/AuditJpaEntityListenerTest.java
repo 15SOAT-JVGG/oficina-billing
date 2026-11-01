@@ -19,7 +19,7 @@ class AuditJpaEntityListenerTest {
     private final AuditJpaEntityListener listener = new AuditJpaEntityListener();
 
     @Test
-    @DisplayName("deve preencher criação e atualização iguais, em UTC, como system")
+    @DisplayName("deve preencher criação e atualização iguais, em UTC e microssegundos, como system")
     void prePersist() {
         SampleJpaEntity entity = new SampleJpaEntity();
 
@@ -28,6 +28,7 @@ class AuditJpaEntityListenerTest {
         assertNotNull(entity.getCreatedAt());
         assertEquals(entity.getCreatedAt(), entity.getUpdatedAt());
         assertEquals(ZoneOffset.UTC, entity.getCreatedAt().getOffset());
+        assertEquals(0, entity.getCreatedAt().getNano() % 1000, "precisão além de microssegundos");
         assertEquals("system", entity.getCreatedBy());
         assertEquals("system", entity.getUpdatedBy());
     }

@@ -6,12 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,7 +51,7 @@ class SecurityPackagingTest {
     @DisplayName("nenhuma chave privada é versionada em lugar algum do repositório")
     void noPrivateKeyAnywhereInRepository() throws IOException {
         List<String> offenders = walk(PROJECT_ROOT,
-                path -> !path.equals(THIS_TEST) && !isUnderIgnoredDirectory(path),
+                path -> !path.equals(THIS_TEST),
                 content -> content.contains(PRIVATE_KEY_MARKER));
 
         assertTrue(offenders.isEmpty(), () -> "Chave privada versionada: " + offenders);
@@ -67,29 +70,31 @@ class SecurityPackagingTest {
         }
     }
 
-    private static boolean isUnderIgnoredDirectory(Path path) {
-        Path relative = PROJECT_ROOT.relativize(path);
-        for (Path segment : relative) {
-            if (IGNORED_DIRECTORIES.contains(segment.toString())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
+    // Diretórios ignorados são podados antes de entrar neles: target/ muda durante o próprio build
+    // (o Surefire grava relatórios enquanto o teste roda) e um Files.walk plano falharia.
     private static List<String> walk(Path root, Predicate<Path> pathFilter, Predicate<String> contentFilter)
             throws IOException {
+        List<String> offenders = new ArrayList<>();
         if (!Files.exists(root)) {
-            return List.of();
+            return offenders;
         }
-        try (Stream<Path> files = Files.walk(root)) {
-            return files
-                    .filter(Files::isRegularFile)
-                    .filter(pathFilter)
-                    .filter(path -> contentFilter.test(read(path)))
-                    .map(path -> PROJECT_ROOT.relativize(path).toString())
-                    .toList();
-        }
+        Files.walkFileTree(root, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path directory, BasicFileAttributes attributes) {
+                return IGNORED_DIRECTORIES.contains(directory.getFileName().toString())
+                        ? FileVisitResult.SKIP_SUBTREE
+                        : FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) {
+                if (attributes.isRegularFile() && pathFilter.test(file) && contentFilter.test(read(file))) {
+                    offenders.add(PROJECT_ROOT.relativize(file).toString());
+                }
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        return offenders;
     }
 
     // ISO_8859_1 mapeia qualquer byte para um caractere, então a busca funciona em binário.
