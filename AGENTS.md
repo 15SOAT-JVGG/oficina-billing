@@ -45,9 +45,9 @@ Todo documento deste repositório classifica suas afirmações com um destes ró
 
 ## Comandos
 
-O repositório nasce só com este harness; `pom.xml`, wrapper, configuração e testes de arquitetura
-são criados na issue #107 seguindo [`docs/engineering/quality-gates.md`](docs/engineering/quality-gates.md)
-e [`docs/architecture/executable-rules.md`](docs/architecture/executable-rules.md). A partir daí:
+`pom.xml`, wrapper, configuração e testes de arquitetura seguem
+[`docs/engineering/quality-gates.md`](docs/engineering/quality-gates.md) e
+[`docs/architecture/executable-rules.md`](docs/architecture/executable-rules.md):
 
 ```shell
 ./mvnw test                 # unitários e testes de arquitetura (*Test)

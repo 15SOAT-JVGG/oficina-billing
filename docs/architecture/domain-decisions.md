@@ -101,12 +101,19 @@ Levar para a issue (comentário) ou para o time antes de implementar; registrar 
    Billing. Recomendação: o `PartRequestDto` do Billing **não declara** esses campos (o Jackson do
    Quarkus ignora propriedades desconhecidas por padrão, então clientes antigos continuam recebendo
    `201`) e o `PartResponseDto` **não os devolve**. Confirmar.
+   _Status (#107):_ implementado conforme a recomendação; `PartControllerIT` prova que
+   `stockQuantity`/`minimumStock` enviados são ignorados e não voltam. Aguarda confirmação do time.
 2. **Fonte de `409` no catálogo.** O critério de aceite de #107 lista `409`, mas não existe hoje
    nenhuma regra que o produza (não há unicidade de `name`). Introduzir unicidade é regra nova e
    precisa de decisão explícita; sem ela, o `*IT` de `409` não se aplica ao catálogo e isso deve ser
    dito no PR.
+   _Status (#107):_ sem unicidade; nenhuma rota do catálogo devolve `409` e nenhum `*IT` o cobre.
+   Registrado na issue como critério não aplicável até decisão do time.
 3. **`createdBy`/`updatedBy`.** O monólito grava `"system"`. Preencher com o `upn` do JWT é melhoria
    barata e sem impacto de contrato, mas é mudança de comportamento: confirmar.
+   _Status (#107):_ mantido `"system"` (`AuditJpaEntityListener`). Aguarda decisão do time.
 4. **Evento "peça cadastrada".** A spec diz que o Execution fica sabendo de peça nova por evento do
    Billing. Não é de #107 (mensageria vem depois); a modelagem de `Part` não deve antecipá-lo além de
    manter o agregado puro e o caso de uso de criação isolado.
+   _Status (#107):_ `Part.register(...)` e `PartService.create(...)` nascem isolados; nada de
+   mensageria antecipado.

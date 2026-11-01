@@ -113,7 +113,7 @@ como está:
 **`404` e demais `AppException` — `ApiErrorResponseDto`:**
 
 ```json
-{ "status": 404, "type": "NOT_FOUND", "code": "SERVICE_ITEM_NOT_FOUND", "message": "Service item not found: <id>", "path": "admin/services/<id>", "timestamp": "..." }
+{ "status": 404, "type": "NOT_FOUND", "code": "SERVICE_ITEM_NOT_FOUND", "message": "Service item not found: <id>", "path": "/admin/services/<id>", "timestamp": "..." }
 ```
 
 **[JUSTIFICAR — justificado no ADR-0003]** No monólito o `404` do catálogo sai pelo mapper legado

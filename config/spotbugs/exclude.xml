@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Vazio de propósito. Cada exclusão futura entra com um <Match> por classe e um comentário
+    dizendo qual é a classe e por que o aviso não se aplica (docs/engineering/quality-gates.md).
+-->
+<FindBugsFilter>
+</FindBugsFilter>

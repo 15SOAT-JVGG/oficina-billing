@@ -1,0 +1,142 @@
+name: Workflow CI
+
+# Gate de PR do oficina-billing: secrets, SAST, build com testes (unitários e *IT com Postgres
+# real), cobertura ≥ 80% e SonarCloud bloqueante. Não há entrada para pular testes: o que o CI
+# prova é o mesmo que ./mvnw verify prova na máquina de quem abriu o PR.
+#
+# Todos os jobs são locais a este repositório, pelo mesmo motivo do oficina-app: workflows
+# reutilizáveis privados da organização reprovam a execução antes de qualquer job começar.
+
+on:
+  pull_request:
+    branches: [main, homolog, production]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.event.repository.name }}-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+
+  # ── 1. Detecção de secrets no histórico do repositório ──────────────────────
+  #
+  # O valor está em varrer o histórico, onde um segredo removido continua recuperável; por
+  # isso fetch-depth: 0. O caminho do arquivo de exceções é explícito para ser auditável.
+  secrets_gitleaks:
+    name: Secrets Scan (Gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Varre o histórico
+        run: |
+          docker run --rm -v "$PWD:/repo" zricethezav/gitleaks:v8.24.3 \
+            detect --source=/repo --redact --verbose \
+              --gitleaks-ignore-path=/repo/.gitleaksignore
+
+  # ── 2. SAST — análise estática de segurança ──────────────────────────────────
+  #
+  # `scan` em vez de `ci` porque o segundo exige conta no Semgrep Cloud. `--error` transforma
+  # achado em reprovação. A regra de tag mutável de action fica de fora, como no oficina-app:
+  # fixar SHA de action oficial custa manutenção a cada versão e protege contra um risco baixo.
+  sast_semgrep:
+    name: SAST (Semgrep)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Analisa o código
+        run: |
+          docker run --rm -v "$PWD:/src" semgrep/semgrep:1.175.0 \
+            semgrep scan --config p/ci --error --metrics=off \
+              --exclude-rule yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag
+
+  # ── 3. Build, testes e gates de qualidade ───────────────────────────────────
+  #
+  # `verify` é o gate inteiro num comando: compila, roda *Test e *IT (Testcontainers usa o
+  # Docker do runner), Spotless, Checkstyle, PMD/CPD, SpotBugs e o mínimo do JaCoCo.
+  build:
+    name: Build & Tests (Quarkus JVM)
+    needs: [secrets_gitleaks, sast_semgrep]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instala o Java 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Build, testes e gates de qualidade
+        run: ./mvnw --batch-mode verify
+
+      # O relatório é o que permite conferir a cobertura de um PR sem rodar nada local.
+      - name: Publica o relatório de cobertura
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: target/jacoco-report
+          retention-days: 7
+          if-no-files-found: warn
+
+  # ── 4. SonarCloud com quality gate bloqueante ───────────────────────────────
+  #
+  # Roda depois do build porque lê o jacoco.xml. `qualitygate.wait=true` faz o passo reprovar
+  # quando o gate reprova. Sem token ou variáveis o job falha explicitamente: a análise nunca
+  # é pulada em silêncio (docs/engineering/quality-gates.md).
+  sonar:
+    name: SonarCloud (quality gate)
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Confere a configuração do Sonar
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY }}
+          SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
+        run: |
+          missing=""
+          [[ -z "$SONAR_TOKEN" ]] && missing="$missing SONAR_TOKEN"
+          [[ -z "$SONAR_PROJECT_KEY" ]] && missing="$missing SONAR_PROJECT_KEY"
+          [[ -z "$SONAR_ORGANIZATION" ]] && missing="$missing SONAR_ORGANIZATION"
+          if [[ -n "$missing" ]]; then
+            echo "::error::SonarCloud não configurado; faltam:$missing"
+            exit 1
+          fi
+
+      - name: Instala o Java 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      # Recompila e reexecuta os testes para ter o jacoco.xml neste job; a análise precisa do
+      # bytecode e da cobertura no mesmo workspace.
+      - name: Análise e quality gate
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY }}
+          SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
+        run: |
+          ./mvnw --batch-mode verify sonar:sonar \
+            -Dsonar.projectKey="$SONAR_PROJECT_KEY" \
+            -Dsonar.organization="$SONAR_ORGANIZATION" \
+            -Dsonar.token="$SONAR_TOKEN" \
+            -Dsonar.qualitygate.wait=true
