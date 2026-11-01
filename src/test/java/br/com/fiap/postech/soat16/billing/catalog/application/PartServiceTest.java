@@ -161,6 +161,18 @@ class PartServiceTest {
             assertThrows(PartNotFoundException.class, () -> result.await().indefinitely());
             verify(persistence, never()).save(any());
         }
+
+        @Test
+        @DisplayName("deve falhar com PartNotFoundException quando o registro some entre a leitura e a gravação")
+        void shouldFailWhenRemovedConcurrently() {
+            Part existing = persisted();
+            when(persistence.findPartById(ID)).thenReturn(Uni.createFrom().item(existing));
+            when(persistence.save(existing)).thenReturn(Uni.createFrom().nullItem());
+
+            Uni<PartResult> result = service.update(new UpdatePartCommand(ID, "Oleo", null, PRICE, "L", null));
+
+            assertThrows(PartNotFoundException.class, () -> result.await().indefinitely());
+        }
     }
 
     @Nested

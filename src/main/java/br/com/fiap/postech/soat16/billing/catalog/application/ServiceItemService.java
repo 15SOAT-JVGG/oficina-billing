@@ -61,6 +61,8 @@ public class ServiceItemService {
                             command.active());
                     return serviceCatalogPersistence.save(serviceItem);
                 })
+                // A porta emite null se o registro sumiu entre a leitura e a gravação.
+                .onItem().ifNull().failWith(() -> new ServiceItemNotFoundException(command.id()))
                 .map(ServiceItemResult::from);
     }
 

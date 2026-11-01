@@ -61,6 +61,8 @@ public class PartService {
                             command.partType());
                     return partPersistence.save(part);
                 })
+                // A porta emite null se o registro sumiu entre a leitura e a gravação.
+                .onItem().ifNull().failWith(() -> new PartNotFoundException(command.id()))
                 .map(PartResult::from);
     }
 

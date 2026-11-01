@@ -160,6 +160,19 @@ class ServiceItemServiceTest {
             assertThrows(ServiceItemNotFoundException.class, () -> result.await().indefinitely());
             verify(persistence, never()).save(any());
         }
+
+        @Test
+        @DisplayName("deve falhar com ServiceItemNotFoundException quando o registro some entre a leitura e a gravação")
+        void shouldFailWhenRemovedConcurrently() {
+            ServiceItem existing = persisted();
+            when(persistence.findServiceItemById(ID)).thenReturn(Uni.createFrom().item(existing));
+            when(persistence.save(existing)).thenReturn(Uni.createFrom().nullItem());
+
+            Uni<ServiceItemResult> result = service
+                    .update(new UpdateServiceItemCommand(ID, "Alinhamento", null, PRICE, 45, true));
+
+            assertThrows(ServiceItemNotFoundException.class, () -> result.await().indefinitely());
+        }
     }
 
     @Nested
