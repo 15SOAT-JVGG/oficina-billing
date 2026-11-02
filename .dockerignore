@@ -1,0 +1,7 @@
+# Exclui tudo por padrão; só o necessário para o build multistage entra no contexto.
+*
+
+!src/
+!pom.xml
+!mvnw
+!.mvn/

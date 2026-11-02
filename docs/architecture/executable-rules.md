@@ -83,7 +83,7 @@ Cada linha: regra → documento que a justifica → classe de teste → como.
 | `@Entity` | sufixo `JpaEntity`, pacote `..adapter.out.persistence.entity..` |
 | `..adapter.out..` que implementa porta | sufixo `Repository` ou `Adapter` |
 | `..domain.exception..` assignável a `Throwable` | sufixo `Exception` |
-| `..domain.exception..` enum | sufixo `ErrorCode` |
+| `..domain.exception..` enum que implementa `ErrorCode` | sufixo `ErrorCode` (`ErrorType`, enum do mesmo pacote, fica de fora) |
 
 ### `DomainModelConventionsTest` — [domain-decisions.md](domain-decisions.md)
 

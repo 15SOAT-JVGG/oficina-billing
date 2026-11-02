@@ -1,0 +1,94 @@
+# Ambiente local do Billing (aplicação + PostgreSQL próprio).
+#
+#     docker compose up                 # tudo, sem configuração prévia
+#     docker compose up -d postgres     # só o banco, para ./mvnw quarkus:dev
+#
+# A imagem é construída a partir do código-fonte (build multistage). O .env é opcional e só
+# sobrescreve os defaults abaixo. Nenhum valor sensível fica aqui além dos de desenvolvimento.
+#
+# Após subir:
+#   - API .............. http://localhost:8080  (rotas /admin/services e /admin/parts)
+#   - Swagger UI ....... http://localhost:8080/q/swagger-ui
+#   - Health ........... http://localhost:9000/q/health
+#
+# O Billing não emite token: valida os do OS Service com a chave pública dele. Para usar os
+# tokens do oficina-app local, aponte JWT_PUBLIC_KEY_DIR para a pasta com o publicKey.pem do
+# OS (ex.: ../oficina-app/.local-jwt). Sem isso, o serviço jwt-keys gera um par descartável no
+# volume jwt_keys só para a demo subir; tokens precisam então ser assinados com a privada desse
+# volume.
+
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: oficina-billing-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USERNAME:-billing}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-billing}
+      POSTGRES_DB: ${POSTGRES_DB:-oficina_billing}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USERNAME:-billing} -d ${POSTGRES_DB:-oficina_billing}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oficina_billing_net
+
+  # Garante um publicKey.pem em /jwt para a demo local. Se JWT_PUBLIC_KEY_DIR já traz a chave
+  # pública do OS, nada é gerado. A imagem da aplicação nunca contém chave.
+  jwt-keys:
+    image: alpine/openssl:3.5.1
+    container_name: oficina-billing-jwt-keys
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >
+        (test -s /os-jwt/publicKey.pem && cp /os-jwt/publicKey.pem /jwt/publicKey.pem) ||
+        test -s /jwt/publicKey.pem ||
+        (openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out /jwt/privateKey.pem &&
+         openssl rsa -pubout -in /jwt/privateKey.pem -out /jwt/publicKey.pem &&
+         chmod 600 /jwt/privateKey.pem);
+        chmod 644 /jwt/publicKey.pem
+    volumes:
+      - jwt_keys:/jwt
+      - ${JWT_PUBLIC_KEY_DIR:-./.local-jwt}:/os-jwt:ro
+
+  app:
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile
+    image: oficina-billing:local
+    container_name: srv-oficina-billing
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      jwt-keys:
+        condition: service_completed_successfully
+    volumes:
+      - jwt_keys:/etc/jwt:ro
+    ports:
+      - "8080:8080"
+      - "9000:9000"
+    environment:
+      POSTGRES_HOST: oficina-billing-postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB:-oficina_billing}
+      POSTGRES_USERNAME: ${POSTGRES_USERNAME:-billing}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-billing}
+      JWT_ISSUER: ${JWT_ISSUER:-oficina-api}
+      JWT_PUBLIC_KEY_LOCATION: file:/etc/jwt/publicKey.pem
+    networks:
+      - oficina_billing_net
+
+networks:
+  oficina_billing_net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  jwt_keys:

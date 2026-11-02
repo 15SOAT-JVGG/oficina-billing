@@ -1,0 +1,4 @@
+# Achados conhecidos e verificados que o Gitleaks continua encontrando porque varre o
+# histórico. Só entra aqui o que foi auditado; um achado novo tem de reprovar a execução.
+#
+# Vazio: este repositório nasceu sem chave versionada (docs/engineering/security.md).

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Tech Challenge Static Analysis"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+    <description>
+        Lightweight local PMD rules for the Quarkus service. The goal is to catch
+        likely bugs without blocking the team on subjective design/style rules.
+    </description>
+
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="AccessorClassGeneration"/>
+        <exclude name="AvoidPrintStackTrace"/>
+        <exclude name="GuardLogStatement"/>
+        <exclude name="JUnit5TestShouldBePackagePrivate"/>
+        <exclude name="UnitTestAssertionsShouldIncludeMessage"/>
+        <exclude name="UnitTestContainsTooManyAsserts"/>
+        <exclude name="AbstractClassWithoutAbstractMethod"/>
+        <exclude name="UnusedAssignment"/>
+        <exclude name="UnusedFormalParameter"/>
+        <exclude name="UnusedLocalVariable"/>
+        <exclude name="UnusedPrivateField"/>
+        <exclude name="UnusedPrivateMethod"/>
+        <exclude name="UseCollectionIsEmpty"/>
+    </rule>
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="AvoidDuplicateLiterals"/>
+        <exclude name="AvoidFieldNameMatchingMethodName"/>
+        <exclude name="AvoidLiteralsInIfCondition"/>
+        <exclude name="AvoidUsingOctalValues"/>
+        <exclude name="EmptyCatchBlock"/>
+        <exclude name="ImplicitSwitchFallThrough"/>
+        <exclude name="MissingSerialVersionUID"/>
+    </rule>
+</ruleset>
