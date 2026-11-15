@@ -9,7 +9,8 @@ tem fonte está listado como **pendente**, e um agente não o resolve sozinho.
 | Capacidade | Dono | Status no Billing |
 |---|---|---|
 | Catálogo de serviços e peças com preço | **Billing** | Issue #107 |
-| Orçamento e itens com snapshot de preço, token e decisão do cliente | **Billing** | Issues posteriores (#109+) |
+| Orçamento inicial e itens com snapshot de preço | **Billing** | #109 (integração provisória) |
+| Token, decisão do cliente, cobrança e pagamento | **Billing** | Issues posteriores (#114, #115) |
 | Cobrança e pagamento (Mercado Pago) | **Billing** | Issues posteriores (#114, #115) |
 | Saldo de estoque, mínimo, estoque baixo, reserva | Execution | **Nunca aqui** |
 | Ordem de Serviço, histórico, cliente, veículo, equipe, login | OS Service (`oficina-app`) | Nunca aqui |
@@ -59,9 +60,9 @@ Os nomes das exceções e códigos acima são a convenção esperada (`<Agregado
 usa `SERVICE_ITEM_NOT_FOUND` em `ServiceItemErrorCode`.
 
 **[RECOMENDADO]** Representar preço como `BigDecimal` com escala 2 (é o que o banco guarda:
-`numeric(10,2)`). Um value object `Money` só se justifica quando o orçamento passar a somar e
-comparar valores; para o catálogo, `BigDecimal` validado no agregado basta. Introduzi-lo é
-[JUSTIFICAR].
+`numeric(10,2)`). O orçamento soma os preços dos itens com `BigDecimal` e escala 2. Um value object
+`Money` ainda exigiria justificar o custo porque a regra atual não precisa de operações monetárias
+além dessa soma e comparação.
 
 ## Como modelar
 
@@ -91,6 +92,23 @@ cliente da API.
 parecer serviço de domínio provavelmente é método de agregado.
 
 **[EVITAR]** Soft delete ou `active` em `Part`. O monólito não tem; a spec não pede. `DELETE` remove.
+
+## Bounded context `estimate`
+
+Issue #109 adiciona o agregado `Estimate`, que guarda a referência da OS e snapshots imutáveis de
+serviços e peças lidos do contexto `catalog`. A porta `CatalogSnapshotPort` mantém a fronteira entre
+contextos: o agregado de orçamento não importa modelos nem adaptadores do catálogo. Só itens
+solicitados na abertura são copiados; abertura sem itens não cria orçamento. Uma referência ausente
+ou serviço inativo falha o fluxo inteiro sem persistir orçamento parcial.
+
+Os eventos `work-order.opened`, `estimate.created` e `estimate.creation-failed` seguem os schemas em
+`docs/events/v1`. Ainda são contratos provisórios até validação conjunta com o OS. A integração usa
+inbox e outbox persistentes; a inbox deduplica pelo `eventId`, e a publicação SQS/SNS FIFO usa o ID da
+OS como grupo. A decisão de coreografia e o rastreamento da causa seguem a spec #106 e ADR-0004.
+
+Preço, nome e tipo ficam congelados nos itens do orçamento; alterações futuras no catálogo não
+reescrevem o snapshot. Token de aceite, decisão do cliente, validade, cobrança e fluxos legados não
+fazem parte desta entrega.
 
 ## Pendências que um agente não decide sozinho
 

@@ -7,7 +7,7 @@ automaticamente (ver [executable-rules.md](executable-rules.md)). Para o racioc�
 
 ## Pacotes
 
-Raiz: `br.com.fiap.postech.soat16.billing`. Contextos atuais: `catalog` e `shared`.
+Raiz: `br.com.fiap.postech.soat16.billing`. Contextos atuais: `catalog`, `estimate` e `shared`.
 
 ```
 br.com.fiap.postech.soat16.billing.<contexto>
@@ -42,7 +42,9 @@ ou `<contexto>.adapter.(in|out)..`. Não existem pacotes horizontais na raiz (`c
 
 **[OBRIGATÓRIO]** `shared` segue a mesma forma e contém só o que é transversal: exceções base e
 `ErrorType`, `ApiErrorResponseDto` e os `ExceptionMapper`, auditoria (`AuditableEntity`,
-`AuditableJpaEntity`, listener), paginação se vier a existir, filtro de correlação. `shared` não
+`AuditableJpaEntity`, listener), paginação se vier a existir, filtro de correlação e factories
+transversais para configurar clientes de infraestrutura. `shared.adapter` é reservado a essas
+factories usadas por adaptadores de entrada e saída; não contém adaptadores de negócio. `shared` não
 depende de nenhum contexto.
 
 ## Direção das dependências
@@ -94,8 +96,8 @@ dados de `B`, `A` declara uma porta de lookup em `A.application.port.out` com o 
 e `A.adapter.out.<b>` a implementa chamando a aplicação de `B` (serviço ou porta de `B`) e traduzindo
 o resultado. Não há ciclos entre contextos.
 
-Hoje há um único contexto de negócio (`catalog`), então a regra está dormente; ela existe para o
-orçamento, que consultará o catálogo por uma porta de preço.
+O contexto `estimate` consulta `catalog` por `CatalogSnapshotPort`; a porta traduz os dados do
+catálogo para os snapshots que o orçamento precisa, sem expor seus modelos internos.
 
 ## Casos de uso
 

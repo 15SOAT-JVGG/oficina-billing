@@ -1,11 +1,12 @@
 # oficina-billing
 
 Serviço de **Billing** da oficina mecânica (FIAP 16SOAT — Tech Challenge, Fase 4,
-[spec #106](https://github.com/15SOAT-JVGG/oficina-app/issues/106)). Hoje detém o **catálogo de
+[spec #106](https://github.com/15SOAT-JVGG/oficina-app/issues/106)). Detém o **catálogo de
 serviços e peças com preço**, extraído do monólito [`oficina-app`](https://github.com/15SOAT-JVGG/oficina-app)
-([issue #107](https://github.com/15SOAT-JVGG/oficina-app/issues/107)); orçamento, decisão do
-cliente e cobrança (Mercado Pago) chegam nas issues seguintes. Saldo de estoque não é deste
-serviço (é do Execution).
+([issue #107](https://github.com/15SOAT-JVGG/oficina-app/issues/107)), e o orçamento inicial com
+snapshot dos itens solicitados ([issue #109](https://github.com/15SOAT-JVGG/oficina-app/issues/109)).
+Os eventos de integração da #109 ainda são provisórios até validação conjunta com o OS. Decisão do
+cliente, validade e cobrança (Mercado Pago) seguem pendentes. Saldo de estoque pertence ao Execution.
 
 ## Stack
 
@@ -47,7 +48,7 @@ existem aqui.
 
 ## Arquitetura
 
-Hexagonal por bounded context (`catalog`, `shared`), domínio rico, um único modelo de erro
+Hexagonal por bounded context (`catalog`, `estimate`, `shared`), domínio rico, um único modelo de erro
 (`AppException` → `ApiErrorResponseDto`), Flyway dono do schema com Hibernate em `validate`.
 Regras verificadas por ArchUnit e testes de contrato. Documentação em [`AGENTS.md`](AGENTS.md),
 [`CONTEXT.md`](CONTEXT.md) e [`docs/`](docs/).
