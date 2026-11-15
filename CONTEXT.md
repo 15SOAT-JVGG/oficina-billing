@@ -1,9 +1,8 @@
 # Billing
 
-Serviço que detém o catálogo de serviços e peças da oficina com os seus preços e, nas fases seguintes,
-o orçamento, a decisão do cliente e a cobrança. Este glossário cobre o que existe hoje: o catálogo.
-Termos de orçamento e cobrança entram quando as issues correspondentes forem implementadas; até lá,
-o vocabulário de referência é o `CONTEXT.md` do `oficina-app`.
+Serviço que detém o catálogo de serviços e peças da oficina com os seus preços e o orçamento inicial
+com snapshot dos itens solicitados. Decisão do cliente, validade e cobrança ainda aguardam issues
+posteriores; para esses termos, o vocabulário de referência segue o `CONTEXT.md` do `oficina-app`.
 
 ## Language
 
@@ -44,6 +43,19 @@ Como a peça é contada no catálogo e no orçamento: `UN`, `L`, `CX` e afins. T
 Estado de um serviço que pode ser oferecido em novos orçamentos. Um serviço inativo permanece no
 catálogo para histórico.
 _Avoid_: habilitado, visível
+
+### Orçamento
+
+**Orçamento** (`Estimate`):
+Snapshot inicial de serviços e peças solicitados na abertura da Ordem de Serviço, com preços e
+descrições do catálogo no momento do processamento. Uma abertura sem itens não cria orçamento. O
+orçamento inicial ainda não inclui validade, token ou decisão do cliente.
+_Avoid_: cotação, proposta
+
+**Item do orçamento** (`EstimateItem`):
+Cópia imutável de um serviço ou peça do catálogo, incluindo referência, descrição, quantidade e preço
+unitário. Não acompanha alterações futuras do catálogo.
+_Avoid_: item de OS, produto precificado
 
 ### Fronteiras
 

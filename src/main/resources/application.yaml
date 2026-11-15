@@ -130,6 +130,20 @@ mp:
       publickey:
         location: ${JWT_PUBLIC_KEY_LOCATION:.local-jwt/publicKey.pem}
 
+app:
+  events:
+    aws:
+      region: ${APP_EVENTS_AWS_REGION:us-east-1}
+      endpoint: ${APP_EVENTS_AWS_ENDPOINT:}
+      access-key-id: ${AWS_ACCESS_KEY_ID:}
+      secret-access-key: ${AWS_SECRET_ACCESS_KEY:}
+      session-token: ${AWS_SESSION_TOKEN:}
+      sqs-queue-url: ${APP_EVENTS_AWS_SQS_QUEUE_URL:}
+      sns-topic-arn: ${APP_EVENTS_AWS_SNS_TOPIC_ARN:}
+      poll-interval: ${APP_EVENTS_AWS_SQS_POLL_INTERVAL:2s}
+      outbox-interval: ${APP_EVENTS_AWS_OUTBOX_INTERVAL:2s}
+      # Na AWS, sem credenciais explícitas, os SDKs usam a cadeia padrão (incluindo role da task).
+
 # ── Perfil de teste ─────────────────────────────────────────────────────────--
 # Só o formato do log muda. Banco, schema e chaves vêm dos QuarkusTestResource; o Flyway migra o
 # container e o Hibernate continua em validate.

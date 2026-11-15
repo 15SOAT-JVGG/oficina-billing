@@ -26,6 +26,8 @@
         <spotless-plugin.version>3.6.0</spotless-plugin.version>
         <sonar-plugin.version>5.1.0.4751</sonar-plugin.version>
         <testcontainers.version>1.20.4</testcontainers.version>
+        <aws-sdk.version>2.29.29</aws-sdk.version>
+        <json-schema-validator.version>1.5.9</json-schema-validator.version>
         <archunit.version>1.4.1</archunit.version>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/jacoco-report/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
@@ -122,12 +124,32 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-opentelemetry</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-scheduler</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sqs</artifactId>
+            <version>${aws-sdk.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>sns</artifactId>
+            <version>${aws-sdk.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.networknt</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>${json-schema-validator.version}</version>
         </dependency>
 
         <!-- Testes -->
@@ -160,6 +182,12 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>localstack</artifactId>
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>

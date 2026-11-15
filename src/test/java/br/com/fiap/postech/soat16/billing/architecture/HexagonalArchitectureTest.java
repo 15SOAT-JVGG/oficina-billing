@@ -39,10 +39,10 @@ class HexagonalArchitectureTest {
         }
 
         @Test
-        @DisplayName("adaptadores declaram direção: adapter.in ou adapter.out")
+        @DisplayName("adaptadores declaram direção ou pertencem à infraestrutura shared")
         void adaptersDeclareDirection() {
             classes().that().resideInAPackage(ADAPTER)
-                    .should().resideInAnyPackage(ADAPTER_IN, ADAPTER_OUT)
+                    .should().resideInAnyPackage(ADAPTER_IN, ADAPTER_OUT, ROOT + ".shared.adapter")
                     .check(PRODUCTION_CLASSES);
         }
     }
