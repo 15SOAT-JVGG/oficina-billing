@@ -28,7 +28,6 @@ class EstimateEventEncoderTest {
     @BeforeEach
     void setUp() {
         encoder = new EstimateEventEncoder();
-        encoder.mapper = mapper;
         encoder.initialize();
     }
 

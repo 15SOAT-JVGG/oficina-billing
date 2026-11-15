@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @DisplayName("WorkOrderOpenedDecoder — contrato recebido")
 class WorkOrderOpenedDecoderTest {
@@ -21,7 +20,6 @@ class WorkOrderOpenedDecoderTest {
     @BeforeEach
     void setUp() {
         decoder = new WorkOrderOpenedDecoder();
-        decoder.mapper = new ObjectMapper();
         decoder.initialize();
     }
 

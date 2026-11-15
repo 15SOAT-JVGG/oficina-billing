@@ -6,7 +6,6 @@ import java.time.Instant;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,8 +24,11 @@ import br.com.fiap.postech.soat16.billing.estimate.domain.model.EstimateItemType
 @ApplicationScoped
 public class EstimateEventEncoder {
 
-    @Inject
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
+
+    public EstimateEventEncoder() {
+        this.mapper = new ObjectMapper();
+    }
     private JsonSchema createdSchema;
     private JsonSchema failedSchema;
 

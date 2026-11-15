@@ -9,7 +9,6 @@ import java.util.UUID;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,8 +24,7 @@ import br.com.fiap.postech.soat16.billing.estimate.application.command.ProcessWo
 @ApplicationScoped
 public class WorkOrderOpenedDecoder {
 
-    @Inject
-    ObjectMapper mapper;
+    private final ObjectMapper mapper = new ObjectMapper();
     private JsonSchema schema;
 
     @PostConstruct
